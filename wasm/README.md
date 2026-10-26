@@ -16,10 +16,18 @@ npm test
 The build writes `dist/lunar-phases.js`, `dist/lunar-phases.d.ts`, and
 `dist/lunar-phases.wasm`.
 
+## Install
+
+Install the published package with npm:
+
+```sh
+npm install lunar-phases-wasm
+```
+
 ## Browser usage
 
 ```js
-import { createLunarPhases } from "@hebertcisco/lunar-phases-wasm";
+import { createLunarPhases } from "lunar-phases-wasm";
 
 const lunar = await createLunarPhases();
 const state = lunar.stateAt(new Date("2026-10-25T12:30:00Z"));
@@ -36,6 +44,19 @@ const lunar = await createLunarPhases({
 });
 ```
 
+`createLunarPhases()` returns a promise for a client with these methods:
+
+- `stateAt(date?)` returns the lunar state at a `Date`, millisecond timestamp,
+  or ISO date string. If omitted, it uses the current time.
+- `phaseAt(lunation, phaseIndex)` returns one principal phase event, where
+  `phaseIndex` is `0` for new moon, `1` for first quarter, `2` for full moon,
+  or `3` for last quarter.
+- `phasesForYear(year)` returns all principal phase events in the requested
+  calendar year.
+
+Dates and phase results use UTC. TypeScript declarations are included in the
+package.
+
 ## Publishing
 
 The repository workflow `.github/workflows/npm-publish.yml` publishes this
@@ -46,7 +67,6 @@ publish a release whose tag matches `wasm/package.json`.
 The workflow can also be run manually. Manual runs default to a dry run and
 execute the build, tests, and `npm pack` without publishing.
 
-`stateAt` accepts a `Date`, a millisecond timestamp, or an ISO date string.
-All input and phase results are UTC. The astronomy model is the same
-educational Meeus/ELP-derived model as the C project and is intended for
-planning and general use, not observatory-grade ephemerides.
+The astronomy model is the same educational Meeus/ELP-derived model as the C
+project and is intended for planning and general use, not observatory-grade
+ephemerides.
