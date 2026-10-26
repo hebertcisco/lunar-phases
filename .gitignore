@@ -14,3 +14,4 @@ coverage/
 *.gcno
 *.gcov
 
+stage-release/
