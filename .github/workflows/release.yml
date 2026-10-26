@@ -3,9 +3,19 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag to rebuild and update (for example, v0.1.0)
+        required: false
+        default: v0.1.0
+        type: string
 
 permissions:
   contents: write
+
+env:
+  RELEASE_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
 
 jobs:
   build:
@@ -25,6 +35,8 @@ jobs:
     steps:
       - name: Check out release source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_VERSION }}
 
       - name: Configure
         shell: bash
@@ -42,7 +54,7 @@ jobs:
       - name: Package release archive
         shell: bash
         env:
-          ARCHIVE: lunar-phases-${{ matrix.platform }}-${{ github.ref_name }}.tar.gz
+          ARCHIVE: lunar-phases-${{ matrix.platform }}-${{ env.RELEASE_VERSION }}.tar.gz
         run: |
           cmake -E chdir stage cmake -E tar czf "../$ARCHIVE" --format=gnutar .
 
@@ -50,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lunar-phases-${{ matrix.platform }}
-          path: lunar-phases-${{ matrix.platform }}-${{ github.ref_name }}.tar.gz
+          path: lunar-phases-${{ matrix.platform }}-${{ env.RELEASE_VERSION }}.tar.gz
           if-no-files-found: error
 
   publish:
@@ -68,4 +80,4 @@ jobs:
       - name: Upload assets to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.ref_name }}" dist/* --clobber
+        run: gh release upload "${{ env.RELEASE_VERSION }}" dist/* --clobber
