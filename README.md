@@ -17,6 +17,7 @@ Lunar Phases turns a date—or the current time—into a readable astronomical s
 - Solves new moon, first quarter, full moon, and last quarter times with Newton refinement.
 - Uses Julian dates, a truncated ELP-2000/82 lunar model, apparent solar longitude, nutation, and an Espenak–Meeus ΔT approximation.
 - Builds with standard C11 and links only against the system math library.
+- Installs a reusable `lunar_core` library with public headers and CMake package metadata.
 - Includes deterministic unit/regression tests, sanitizer support, and GitHub Actions CI on Linux and macOS.
 
 ## Quick start
@@ -79,6 +80,17 @@ Install the executable and public headers locally:
 cmake --install build --prefix "$HOME/.local"
 ```
 
+The same install contains the `lunar_core` static library and can be consumed from
+another CMake project:
+
+```cmake
+find_package(LunarPhases CONFIG REQUIRED)
+target_link_libraries(your_target PRIVATE LunarPhases::lunar_core)
+```
+
+GitHub Releases publish an archive for Linux, Windows, and macOS containing the
+CLI, library, headers, and CMake package files.
+
 ## Project layout
 
 | Path | Purpose |
@@ -86,8 +98,9 @@ cmake --install build --prefix "$HOME/.local"
 | `include/` | Public C headers for calendar, astronomy, and phase calculations |
 | `src/` | Julian-date conversion, lunar/solar model, phase solver, and CLI |
 | `tests/` | Deterministic reference and bounds tests |
+| `cmake/` | CMake package configuration used by downstream projects |
 | `art/` | Project artwork used by the documentation |
-| `.github/workflows/` | Build, test, and sanitizer CI |
+| `.github/workflows/` | Build, test, sanitizer, and release workflows |
 
 ## Accuracy and scope
 
