@@ -1,6 +1,6 @@
 {
-  "name": "@hebertcisco/lunar-phases-wasm",
-  "version": "0.1.0",
+  "name": "lunar-phases-wasm",
+  "version": "0.1.1",
   "description": "Client-side lunar phase calculations powered by WebAssembly.",
   "type": "module",
   "main": "./dist/lunar-phases.js",
@@ -12,11 +12,22 @@
       "import": "./dist/lunar-phases.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "sh ./scripts/build-wasm.sh",
     "test": "node --test test/*.test.js"
   },
-  "keywords": ["astronomy", "moon", "lunar", "wasm", "webassembly", "browser"],
+  "keywords": [
+    "astronomy",
+    "moon",
+    "lunar",
+    "wasm",
+    "webassembly",
+    "browser"
+  ],
   "license": "MIT"
 }
