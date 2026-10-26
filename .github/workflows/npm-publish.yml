@@ -1,0 +1,89 @@
+name: Publish WebAssembly package to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to publish from (branch, tag, or SHA)
+        required: false
+        default: main
+        type: string
+      dry_run:
+        description: Build and pack without publishing to npm
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  PACKAGE_DIR: wasm
+
+jobs:
+  publish:
+    name: Build, test, and publish npm package
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_REF: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.ref }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+
+    steps:
+      - name: Check out release source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_REF }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install WebAssembly toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang lld
+
+      - name: Validate release version
+        if: github.event_name == 'release'
+        working-directory: ${{ env.PACKAGE_DIR }}
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${RELEASE_TAG#v}"
+          test "$RELEASE_TAG" != "$TAG_VERSION" || {
+            echo "Release tag must use the vX.Y.Z format: $RELEASE_TAG" >&2
+            exit 1
+          }
+          test "$PACKAGE_VERSION" = "$TAG_VERSION" || {
+            echo "Package version $PACKAGE_VERSION does not match release tag $RELEASE_TAG" >&2
+            exit 1
+          }
+
+      - name: Run JavaScript tests
+        working-directory: ${{ env.PACKAGE_DIR }}
+        run: npm test
+
+      - name: Build WebAssembly distribution
+        working-directory: ${{ env.PACKAGE_DIR }}
+        run: npm run build
+
+      - name: Verify npm package contents
+        working-directory: ${{ env.PACKAGE_DIR }}
+        run: npm pack --dry-run
+
+      - name: Publish package
+        if: env.DRY_RUN != 'true'
+        working-directory: ${{ env.PACKAGE_DIR }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance

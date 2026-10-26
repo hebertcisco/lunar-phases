@@ -88,6 +88,12 @@ find_package(LunarPhases CONFIG REQUIRED)
 target_link_libraries(your_target PRIVATE LunarPhases::lunar_core)
 ```
 
+## Browser / WebAssembly package
+
+The `wasm/` directory provides a client-side JavaScript API backed by the same
+astronomy core. See [wasm/README.md](wasm/README.md) for browser usage and the
+`npm run build` command that produces the WebAssembly module and ESM bindings.
+
 GitHub Releases publish an archive for Linux, Windows, and macOS containing the
 CLI, library, headers, and CMake package files.
 
