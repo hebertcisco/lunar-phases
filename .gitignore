@@ -1,0 +1,16 @@
+build/
+build-*/
+.DS_Store
+
+# Local IDE and tooling files
+.cache/
+.clangd/
+.vscode/
+compile_commands.json
+
+# Coverage output
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
