@@ -80,4 +80,5 @@ jobs:
       - name: Upload assets to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: gh release upload "${{ env.RELEASE_VERSION }}" dist/* --clobber
